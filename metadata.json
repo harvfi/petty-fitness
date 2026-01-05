@@ -1,0 +1,8 @@
+{
+  "name": "PETTYFITNESS 22 Ecosystem",
+  "description": "A comprehensive fitness management platform for PettyFitness 22. Features testimonial management, event scheduling, location mapping, and an AI-powered workout tracker for clients.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

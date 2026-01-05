@@ -1,0 +1,56 @@
+
+import React from 'react';
+
+interface HeroProps {
+  onJoin: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onJoin }) => {
+  const handleScrollToPrices = () => {
+    const element = document.getElementById('pricing-plans');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <section className="relative h-[85vh] flex items-center overflow-hidden bg-black">
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://picsum.photos/seed/fitness-focus/1920/1080" 
+          alt="Gym background" 
+          className="w-full h-full object-cover opacity-30 grayscale contrast-125"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-4xl">
+          <span className="text-orange-brand font-black uppercase tracking-[0.4em] text-sm mb-4 block animate-in fade-in duration-700">"Hard work is easy work"</span>
+          <h1 className="font-bebas text-8xl md:text-[10rem] italic leading-[0.85] mb-6 animate-in fade-in slide-in-from-left duration-1000">
+            PETTYFITNESS <span className="text-orange-brand">22</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-zinc-300 mb-10 max-w-2xl font-medium leading-relaxed">
+            Because the harder you work, the easier the work becomes... If you're looking to get in shape, lose weight, and learn new techniques, come see me!
+          </p>
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <button 
+              onClick={onJoin}
+              className="bg-orange-brand text-black font-black py-5 px-12 rounded-2xl text-lg uppercase transition-all hover:scale-105 orange-glow"
+            >
+              Book With Me
+            </button>
+            <button 
+              onClick={handleScrollToPrices}
+              className="border-2 border-white/20 hover:border-orange-brand hover:text-orange-brand text-white font-black py-5 px-12 rounded-2xl text-lg uppercase transition-all"
+            >
+              View Rates
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Hero;
