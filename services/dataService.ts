@@ -43,6 +43,14 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
 
 const DEFAULT_EVENTS: GymEvent[] = [
   {
+    id: 'fun-run-saturday',
+    title: 'Fun Run',
+    description: 'Weekly community fun run at YMCA Kings Mountain, NC. All fitness levels welcome!',
+    date: '2026-01-11', // Next Saturday
+    time: '01:00 PM',
+    category: 'Special'
+  },
+  {
     id: 'special-5k-shelby',
     title: 'YMCA 5K Run',
     description: 'PettyFitness 22 takes over Shelby! Meet at the YMCA for the 5k event. Shelby, North Carolina 28150.',
