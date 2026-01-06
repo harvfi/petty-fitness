@@ -51,6 +51,7 @@ interface SMSNotificationData {
   userEmail: string;
   userPhone?: string;
   planTitle?: string;
+  bookingDate?: string;
   action: 'booking' | 'plan_selection';
 }
 
@@ -79,11 +80,12 @@ export const sendSMSNotification = async (data: SMSNotificationData): Promise<{ 
   }
 };
 
-export const sendBookingSMS = async (userName: string, userEmail: string, userPhone?: string) => {
+export const sendBookingSMS = async (userName: string, userEmail: string, userPhone?: string, bookingDate?: string) => {
   return sendSMSNotification({
     userName,
     userEmail,
     userPhone,
+    bookingDate,
     action: 'booking'
   });
 };

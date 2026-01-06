@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 interface BookingFormProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (formData: { name: string; email: string; phone: string }) => void;
+    onSubmit: (formData: { name: string; email: string; phone: string; date: string }) => void;
     planTitle?: string;
     actionType: 'booking' | 'plan_selection';
 }
@@ -13,7 +13,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ isOpen, onClose, onSubmit, pl
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        date: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -37,11 +38,17 @@ const BookingForm: React.FC<BookingFormProps> = ({ isOpen, onClose, onSubmit, pl
             return;
         }
 
+        // Date validation if actionType is booking
+        if (actionType === 'booking' && !formData.date) {
+            setError('Preferred date is required for booking');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             await onSubmit(formData);
             // Reset form
-            setFormData({ name: '', email: '', phone: '' });
+            setFormData({ name: '', email: '', phone: '', date: '' });
             onClose();
         } catch (err) {
             setError('Failed to submit. Please try again.');
@@ -126,6 +133,24 @@ const BookingForm: React.FC<BookingFormProps> = ({ isOpen, onClose, onSubmit, pl
                             placeholder="(980) 421-6801"
                         />
                     </div>
+
+                    {actionType === 'booking' && (
+                        <div>
+                            <label htmlFor="date" className="block text-sm font-bold text-zinc-300 mb-2 uppercase tracking-wider">
+                                Preferred Date *
+                            </label>
+                            <input
+                                type="date"
+                                id="date"
+                                name="date"
+                                value={formData.date}
+                                onChange={handleChange}
+                                required={actionType === 'booking'}
+                                min={new Date().toISOString().split('T')[0]}
+                                className="w-full px-4 py-3 bg-black border border-zinc-700 rounded-xl text-white focus:border-orange-brand focus:outline-none transition-colors"
+                            />
+                        </div>
+                    )}
 
                     {/* Buttons */}
                     <div className="flex space-x-3 pt-4">

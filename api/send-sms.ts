@@ -21,7 +21,7 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
-        const { userName, userEmail, userPhone, planTitle, action } = req.body;
+        const { userName, userEmail, userPhone, planTitle, bookingDate, action } = req.body;
 
         // Validate required fields
         if (!userName || !action) {
@@ -33,7 +33,8 @@ export default async function handler(req: any, res: any) {
         if (action === 'plan_selection') {
             message = `🏋️ NEW PLAN SELECTED\n\nClient: ${userName}\nEmail: ${userEmail || 'Not provided'}\nPhone: ${userPhone || 'Not provided'}\nPlan: ${planTitle}\n\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}`;
         } else if (action === 'booking') {
-            message = `📅 NEW BOOKING REQUEST\n\nClient: ${userName}\nEmail: ${userEmail || 'Not provided'}\nPhone: ${userPhone || 'Not provided'}\n\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}`;
+            const dateInfo = bookingDate ? `\nPreferred Date: ${new Date(bookingDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}` : '';
+            message = `📅 NEW BOOKING REQUEST\n\nClient: ${userName}\nEmail: ${userEmail || 'Not provided'}\nPhone: ${userPhone || 'Not provided'}${dateInfo}\n\nTime: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}`;
         } else {
             return res.status(400).json({ error: 'Invalid action type' });
         }

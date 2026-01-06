@@ -22,16 +22,17 @@ const Hero: React.FC<HeroProps> = ({ onJoin }) => {
     setShowBookingForm(true);
   };
 
-  const handleBookingFormSubmit = async (formData: { name: string; email: string; phone: string }) => {
+  const handleBookingFormSubmit = async (formData: { name: string; email: string; phone: string; date: string }) => {
     // Log the user in
     onJoin();
 
-    // Send SMS notification
+    // Send SMS notification with booking date
     try {
       const result = await sendBookingSMS(
         formData.name,
         formData.email,
-        formData.phone
+        formData.phone,
+        formData.date
       );
 
       if (!result.success) {
