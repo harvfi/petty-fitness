@@ -11,11 +11,11 @@ const EventList: React.FC = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [viewType, setViewType] = useState<'split' | 'full'>('split');
-  
+
   // Contact state for reservation
   const [contactInfo, setContactInfo] = useState('');
   const [contactError, setContactError] = useState(false);
-  
+
   // Calendar State
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -28,7 +28,7 @@ const EventList: React.FC = () => {
   const handleReserveClick = (event: GymEvent) => {
     setSelectedEvent(event);
     setIsConfirming(true);
-    
+
     const user = getCurrentUser();
     let prefill = '';
     if (user) {
@@ -36,7 +36,7 @@ const EventList: React.FC = () => {
       else if (user.prefEmail && user.email) prefill = user.email;
       else prefill = user.email || user.phone || '';
     }
-    
+
     setContactInfo(prefill);
     setContactError(false);
   };
@@ -46,7 +46,7 @@ const EventList: React.FC = () => {
       setContactError(true);
       return;
     }
-    
+
     alert(`Success! You've reserved a spot for "${selectedEvent?.title}". A confirmation has been sent to ${contactInfo}. See you there!`);
     setIsConfirming(false);
     setSelectedEvent(null);
@@ -65,7 +65,7 @@ const EventList: React.FC = () => {
     const month = currentMonth.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
-    
+
     const days = [];
     // Pad for previous month days
     for (let i = 0; i < firstDay; i++) days.push(null);
@@ -90,30 +90,30 @@ const EventList: React.FC = () => {
 
   const isToday = (date: Date) => {
     const today = new Date();
-    return date.getDate() === today.getDate() && 
-           date.getMonth() === today.getMonth() && 
-           date.getFullYear() === today.getFullYear();
+    return date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
   };
 
   return (
     <section id="classes-schedule" className="py-24 bg-black relative border-t border-zinc-900 min-h-screen">
       <div className="container mx-auto px-4">
-        
+
         {/* Header and View Switcher */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
           <div>
             <span className="text-[#d4ff00] font-bold tracking-widest uppercase text-sm">Gym Schedule</span>
             <h2 className="font-bebas text-7xl italic mt-2">CLASS CALENDAR.</h2>
           </div>
-          
+
           <div className="flex bg-zinc-900/80 p-1.5 rounded-2xl border border-zinc-800">
-            <button 
+            <button
               onClick={() => setViewType('split')}
               className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewType === 'split' ? 'bg-[#d4ff00] text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
             >
               Split View
             </button>
-            <button 
+            <button
               onClick={() => setViewType('full')}
               className={`px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${viewType === 'full' ? 'bg-[#d4ff00] text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
             >
@@ -175,9 +175,9 @@ const EventList: React.FC = () => {
                     );
                   })}
                 </div>
-                
+
                 {selectedDate && (
-                  <button 
+                  <button
                     onClick={() => setSelectedDate(null)}
                     className="w-full mt-8 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                   >
@@ -196,31 +196,33 @@ const EventList: React.FC = () => {
                 <div className="h-px bg-zinc-800 flex-grow"></div>
               </div>
 
-              {filteredEvents.length > 0 ? filteredEvents.map((e) => (
-                <div key={e.id} className="group flex flex-col sm:flex-row items-start sm:items-center bg-zinc-900/30 p-8 rounded-3xl border border-zinc-800 hover:border-[#d4ff00]/40 transition-all duration-500">
-                  <div className="w-full sm:w-40 mb-6 sm:mb-0">
-                    <span className="block font-bebas text-4xl text-[#d4ff00] tracking-tight">{new Date(e.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short' })}</span>
-                    <span className="text-zinc-500 uppercase text-[10px] font-black tracking-widest block mt-1">{e.time}</span>
-                  </div>
-                  <div className="flex-grow pr-8">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                        e.category === 'Class' ? 'bg-blue-500/10 text-blue-400' : e.category === 'Workshop' ? 'bg-purple-500/10 text-purple-400' : 'bg-orange-500/10 text-orange-400'
-                      }`}>
-                        {e.category}
-                      </span>
+              {filteredEvents.length > 0 ? filteredEvents.map((e) => {
+                const eventDate = e.date ? new Date(e.date + 'T00:00:00') : new Date();
+                return (
+                  <div key={e.id} className="group flex flex-col sm:flex-row items-start sm:items-center bg-zinc-900/30 p-8 rounded-3xl border border-zinc-800 hover:border-[#d4ff00]/40 transition-all duration-500">
+                    <div className="w-full sm:w-40 mb-6 sm:mb-0">
+                      <span className="block font-bebas text-4xl text-[#d4ff00] tracking-tight">{eventDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short' })}</span>
+                      <span className="text-zinc-500 uppercase text-[10px] font-black tracking-widest block mt-1">{e.time}</span>
                     </div>
-                    <h4 className="text-2xl font-bold text-white group-hover:text-[#d4ff00] transition-colors mb-2">{e.title}</h4>
-                    <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">{e.description}</p>
+                    <div className="flex-grow pr-8">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${e.category === 'Class' ? 'bg-blue-500/10 text-blue-400' : e.category === 'Workshop' ? 'bg-purple-500/10 text-purple-400' : 'bg-orange-500/10 text-orange-400'
+                          }`}>
+                          {e.category}
+                        </span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-white group-hover:text-[#d4ff00] transition-colors mb-2">{e.title}</h4>
+                      <p className="text-zinc-500 text-sm leading-relaxed line-clamp-2">{e.description}</p>
+                    </div>
+                    <button
+                      onClick={() => handleReserveClick(e)}
+                      className="mt-6 sm:mt-0 px-10 py-4 bg-white text-black font-black text-xs uppercase rounded-2xl hover:bg-[#d4ff00] transition-all transform hover:scale-105 active:scale-95 shadow-xl"
+                    >
+                      Reserve
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => handleReserveClick(e)}
-                    className="mt-6 sm:mt-0 px-10 py-4 bg-white text-black font-black text-xs uppercase rounded-2xl hover:bg-[#d4ff00] transition-all transform hover:scale-105 active:scale-95 shadow-xl"
-                  >
-                    Reserve
-                  </button>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div className="py-32 text-center bg-zinc-900/20 border-2 border-dashed border-zinc-800 rounded-3xl">
                   <p className="text-zinc-600 font-bold uppercase tracking-widest">No sessions scheduled.</p>
                   <button onClick={() => setSelectedDate(null)} className="mt-4 text-[#d4ff00] text-xs font-black uppercase underline decoration-2 underline-offset-4">Reset Schedule</button>
@@ -257,7 +259,7 @@ const EventList: React.FC = () => {
                 ))}
                 {daysInMonth.map((date, idx) => {
                   if (!date) return <div key={`full-empty-${idx}`} className="aspect-square bg-black/40 border-r border-b border-zinc-800"></div>;
-                  
+
                   const dateStr = date.toISOString().split('T')[0];
                   const dayEvents = getEventsForDate(date);
                   const active = selectedDate === dateStr;
@@ -269,12 +271,12 @@ const EventList: React.FC = () => {
                       onClick={() => {
                         setSelectedDate(active ? null : dateStr);
                         if (!active) {
-                           // Smoothly scroll down to agenda if on mobile
-                           if (window.innerWidth < 768) {
-                             setTimeout(() => {
-                               document.getElementById('daily-agenda')?.scrollIntoView({ behavior: 'smooth' });
-                             }, 100);
-                           }
+                          // Smoothly scroll down to agenda if on mobile
+                          if (window.innerWidth < 768) {
+                            setTimeout(() => {
+                              document.getElementById('daily-agenda')?.scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                          }
                         }
                       }}
                       className={`
@@ -286,7 +288,7 @@ const EventList: React.FC = () => {
                       <span className={`text-xl font-bebas italic ${active ? 'text-[#d4ff00]' : today ? 'text-white' : 'text-zinc-500'} group-hover:text-[#d4ff00] transition-colors`}>
                         {date.getDate()}
                       </span>
-                      
+
                       <div className="mt-2 space-y-1 w-full hidden md:block">
                         {dayEvents.slice(0, 3).map((e, i) => (
                           <div key={i} className="text-[9px] px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 truncate text-left uppercase font-bold">
@@ -318,7 +320,7 @@ const EventList: React.FC = () => {
                   <div className="h-px bg-[#d4ff00]/30 flex-grow"></div>
                   <button onClick={() => setSelectedDate(null)} className="text-[#d4ff00] text-xs font-black uppercase tracking-widest border border-[#d4ff00]/30 px-6 py-2 rounded-full hover:bg-[#d4ff00]/10">Clear Filter</button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredEvents.map(e => (
                     <div key={e.id} className="bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] flex items-center justify-between group hover:border-[#d4ff00] transition-all">
@@ -327,7 +329,7 @@ const EventList: React.FC = () => {
                         <h4 className="text-xl font-bold text-white mb-2">{e.title}</h4>
                         <p className="text-zinc-500 text-sm">{e.description}</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => handleReserveClick(e)}
                         className="bg-white text-black px-6 py-3 rounded-xl font-black text-[10px] uppercase hover:bg-[#d4ff00] transition-colors"
                       >
@@ -355,7 +357,7 @@ const EventList: React.FC = () => {
               </div>
               <h3 className="font-bebas text-5xl italic mb-3 tracking-tight">SPOT SECURED?</h3>
               <p className="text-zinc-400 mb-8 leading-relaxed">
-                Confirm your reservation for <span className="text-white font-bold">{selectedEvent.title}</span> on {new Date(selectedEvent.date).toLocaleDateString()}.
+                Confirm your reservation for <span className="text-white font-bold">{selectedEvent.title}</span> on {selectedEvent.date ? new Date(selectedEvent.date + 'T00:00:00').toLocaleDateString() : 'TBD'}.
               </p>
 
               <div className="text-left mb-8">
@@ -363,7 +365,7 @@ const EventList: React.FC = () => {
                   Confirmation Destination
                 </label>
                 <div className="relative">
-                  <input 
+                  <input
                     type="text"
                     placeholder="Email or Mobile Number"
                     className={`w-full bg-black border ${contactError ? 'border-red-500' : 'border-zinc-800'} rounded-2xl p-5 text-white placeholder-zinc-700 focus:outline-none focus:border-[#d4ff00] transition-colors`}
@@ -379,15 +381,15 @@ const EventList: React.FC = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex flex-col space-y-4">
-                <button 
+                <button
                   onClick={handleConfirm}
                   className="w-full bg-[#d4ff00] text-black font-black py-5 rounded-2xl uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-[0_10px_30px_rgba(212,255,0,0.2)]"
                 >
                   Finalize Reservation
                 </button>
-                <button 
+                <button
                   onClick={handleCancel}
                   className="w-full bg-zinc-900 text-zinc-500 font-black py-5 rounded-2xl uppercase tracking-widest hover:text-white transition-colors"
                 >
