@@ -29,14 +29,22 @@ const generateSaturdayFunRuns = (): GymEvent[] => {
   const saturdays: GymEvent[] = [];
   const currentDate = new Date(today);
 
-  // Find the next Saturday
-  const daysUntilSaturday = (6 - currentDate.getDay() + 7) % 7;
-  if (daysUntilSaturday === 0 && currentDate.getDay() === 6) {
+  // Find the next Saturday (Saturday is day 6 in JavaScript)
+  const currentDay = currentDate.getDay();
+  let daysUntilSaturday;
+
+  if (currentDay === 6) {
     // If today is Saturday, start from today
-    currentDate.setDate(currentDate.getDate());
+    daysUntilSaturday = 0;
+  } else if (currentDay < 6) {
+    // If before Saturday this week
+    daysUntilSaturday = 6 - currentDay;
   } else {
-    currentDate.setDate(currentDate.getDate() + daysUntilSaturday);
+    // If Sunday (day 0), next Saturday is 6 days away
+    daysUntilSaturday = 6;
   }
+
+  currentDate.setDate(currentDate.getDate() + daysUntilSaturday);
 
   // Generate 8 Saturday events
   for (let i = 0; i < 8; i++) {
@@ -49,7 +57,7 @@ const generateSaturdayFunRuns = (): GymEvent[] => {
       time: '01:00 PM',
       category: 'Special'
     });
-    // Move to next Saturday
+    // Move to next Saturday (7 days later)
     currentDate.setDate(currentDate.getDate() + 7);
   }
 
