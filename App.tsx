@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import PricingSection from './components/PricingSection';
 import TestimonialSection from './components/TestimonialSection';
-// import EventList from './components/EventList';
+import EventList from './components/EventList';
 // import GymMap from './components/GymMap';
 import { User, UserRole } from './types';
 import { getCurrentUser, logout as clearSession, login } from './services/dataService';
@@ -43,8 +43,10 @@ const App: React.FC = () => {
         <Hero onJoin={() => handleLogin(login(UserRole.CLIENT))} />
         <PricingSection />
         <TestimonialSection />
+        <EventList />
         <div style={{ padding: '50px', color: 'white' }}>
-          <p>✅ TestimonialSection loaded successfully!</p>
+          <p>✅ EventList loaded successfully!</p>
+          <p>🎯 If you see this, GymMap is the failing component!</p>
         </div>
       </main>
     </div>
