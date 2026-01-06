@@ -81,15 +81,15 @@ export const saveTestimonial = (t: Testimonial) => {
 export const getEvents = (): GymEvent[] => {
   const data = localStorage.getItem(KEYS.EVENTS);
   const allEvents: GymEvent[] = data ? JSON.parse(data) : DEFAULT_EVENTS;
-  
+
   // Filter out past events
   const currentEvents = allEvents.filter(event => event.date >= todayStr);
-  
+
   // If we removed some events, sync back to local storage
   if (currentEvents.length !== allEvents.length) {
     localStorage.setItem(KEYS.EVENTS, JSON.stringify(currentEvents));
   }
-  
+
   return currentEvents;
 };
 
@@ -144,13 +144,13 @@ export const saveSteps = (userId: string, count: number, date: string) => {
   const data = localStorage.getItem(KEYS.STEPS);
   const all: StepEntry[] = data ? JSON.parse(data) : [];
   const existing = all.findIndex(s => s.userId === userId && s.date === date);
-  
+
   if (existing !== -1) {
     all[existing].count = count;
   } else {
     all.push({ id: Math.random().toString(36).substr(2, 9), userId, count, date });
   }
-  
+
   localStorage.setItem(KEYS.STEPS, JSON.stringify(all));
 };
 
@@ -173,7 +173,7 @@ export const updateUser = (updatedUser: User) => {
   if (index !== -1) {
     users[index] = updatedUser;
     localStorage.setItem(KEYS.ALL_USERS, JSON.stringify(users));
-    
+
     // Also update current session if it's the same user
     const current = getCurrentUser();
     if (current && current.id === updatedUser.id) {
@@ -203,4 +203,19 @@ export const login = (role: UserRole): User => {
 
 export const logout = () => {
   localStorage.removeItem(KEYS.USER);
+};
+
+export const selectPlan = (userId: string, planTitle: string): void => {
+  const users = getUsers();
+  const user = users.find(u => u.id === userId);
+  if (user) {
+    user.selectedPlan = planTitle;
+    user.planSelectedDate = new Date().toISOString();
+    updateUser(user);
+  }
+};
+
+export const getTrainer = (): User | null => {
+  const users = getUsers();
+  return users.find(u => u.role === UserRole.TRAINER) || null;
 };

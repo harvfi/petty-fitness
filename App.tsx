@@ -46,7 +46,7 @@ const App: React.FC = () => {
         {view === 'home' ? (
           <>
             <Hero onJoin={() => handleLogin(login(UserRole.CLIENT))} />
-            <PricingSection />
+            <PricingSection user={user} onLogin={handleLogin} />
             <TestimonialSection />
             <EventList />
             {/* GymMap temporarily disabled - investigating why safety check doesn't prevent Vercel crash */}

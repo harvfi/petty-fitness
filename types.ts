@@ -68,6 +68,8 @@ export interface User {
   prefEmail?: boolean;
   prefPhone?: boolean;
   nutritionPlan?: string; // New field for trainer-assigned nutrition strategy
+  selectedPlan?: string; // Selected pricing plan: "Single Session", "Standard Flow", or "Elite Routine"
+  planSelectedDate?: string; // ISO date string when plan was selected
 }
 
 export interface AIWorkoutPlan {

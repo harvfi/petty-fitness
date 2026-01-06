@@ -12,7 +12,7 @@ export const getNotificationStatus = (): NotificationPermission => {
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!isNotificationSupported()) return false;
-  
+
   const permission = await Notification.requestPermission();
   if (permission === 'granted') {
     localStorage.setItem(NOTIFICATION_KEY, 'true');
@@ -30,6 +30,16 @@ export const sendNotification = (title: string, options?: NotificationOptions) =
     new Notification(title, {
       icon: 'https://picsum.photos/seed/pulse-logo/128/128',
       ...options
+    });
+  }
+};
+
+export const notifyTrainerPlanSelection = (clientName: string, planTitle: string) => {
+  if (getNotificationStatus() === 'granted') {
+    sendNotification('New Plan Selection', {
+      body: `${clientName} selected the ${planTitle} plan`,
+      icon: 'https://picsum.photos/seed/pulse-logo/128/128',
+      tag: 'plan-selection'
     });
   }
 };
