@@ -48,7 +48,11 @@ const generateSaturdayFunRuns = (): GymEvent[] => {
 
   // Generate 8 Saturday events
   for (let i = 0; i < 8; i++) {
-    const dateStr = currentDate.toISOString().split('T')[0];
+    // Format date as YYYY-MM-DD in local timezone to avoid UTC conversion issues
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
     saturdays.push({
       id: `fun-run-saturday-${i + 1}`,
       title: 'Fun Run',
