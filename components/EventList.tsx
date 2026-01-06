@@ -41,13 +41,40 @@ const EventList: React.FC = () => {
     setContactError(false);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!contactInfo.trim()) {
       setContactError(true);
       return;
     }
 
-    alert(`Success! You've reserved a spot for "${selectedEvent?.title}". A confirmation has been sent to ${contactInfo}. See you there!`);
+    try {
+      // Send confirmation to user
+      const response = await fetch('/api/send-event-confirmation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contactInfo: contactInfo,
+          eventTitle: selectedEvent?.title,
+          eventDate: selectedEvent?.date,
+          eventTime: selectedEvent?.time,
+          userName: currentUser?.name || 'Guest'
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`Success! You've reserved a spot for "${selectedEvent?.title}". A confirmation has been sent to ${contactInfo}. See you there!`);
+      } else {
+        alert(`Reservation confirmed for "${selectedEvent?.title}"! Note: We couldn't send a confirmation message, but your spot is reserved.`);
+      }
+    } catch (error) {
+      console.error('Error sending confirmation:', error);
+      alert(`Reservation confirmed for "${selectedEvent?.title}"! Note: We couldn't send a confirmation message, but your spot is reserved.`);
+    }
+
     setIsConfirming(false);
     setSelectedEvent(null);
     setContactInfo('');
