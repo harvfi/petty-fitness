@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import PricingSection from './components/PricingSection';
-// import TestimonialSection from './components/TestimonialSection';
+import TestimonialSection from './components/TestimonialSection';
 // import EventList from './components/EventList';
 // import GymMap from './components/GymMap';
 import { User, UserRole } from './types';
@@ -42,8 +42,9 @@ const App: React.FC = () => {
       <main className="flex-grow">
         <Hero onJoin={() => handleLogin(login(UserRole.CLIENT))} />
         <PricingSection />
+        <TestimonialSection />
         <div style={{ padding: '50px', color: 'white' }}>
-          <p>✅ PricingSection loaded successfully!</p>
+          <p>✅ TestimonialSection loaded successfully!</p>
         </div>
       </main>
     </div>
