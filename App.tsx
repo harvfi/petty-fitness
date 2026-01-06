@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-// import Hero from './components/Hero';
+import Hero from './components/Hero';
 // import TestimonialSection from './components/TestimonialSection';
 // import PricingSection from './components/PricingSection';
 // import EventList from './components/EventList';
@@ -42,10 +42,20 @@ const App: React.FC = () => {
         currentView={view}
       />
 
-      <main className="flex-grow" style={{ padding: '50px', color: 'white' }}>
-        <h1 style={{ fontSize: '48px' }}>Testing Components</h1>
-        <p>✅ Header component loaded successfully!</p>
-        <p>User: {user ? user.name : 'Not logged in'}</p>
+      <main className="flex-grow">
+        {view === 'home' ? (
+          <>
+            <Hero onJoin={() => handleLogin(login(UserRole.CLIENT))} />
+            <div style={{ padding: '50px', color: 'white' }}>
+              <p>✅ Hero component loaded successfully!</p>
+            </div>
+          </>
+        ) : (
+          <div style={{ padding: '50px', color: 'white' }}>
+            <h1>Dashboard View</h1>
+            <p>User: {user?.name}</p>
+          </div>
+        )}
       </main>
     </div>
   );
