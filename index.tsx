@@ -1,7 +1,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+
+// Minimal test to verify React mounting works
+const App = () => {
+  return (
+    <div style={{ color: 'white', padding: '50px', fontSize: '24px' }}>
+      <h1>PETTYFITNESS 22 - TEST</h1>
+      <p>If you can see this, React is working!</p>
+    </div>
+  );
+};
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
