@@ -125,7 +125,24 @@ export const saveTestimonial = (t: Testimonial) => {
 
 export const getEvents = (): GymEvent[] => {
   const data = localStorage.getItem(KEYS.EVENTS);
-  const allEvents: GymEvent[] = data ? JSON.parse(data) : DEFAULT_EVENTS;
+  let allEvents: GymEvent[] = data ? JSON.parse(data) : DEFAULT_EVENTS;
+
+  // CACHE FIX: Detect and clear old Sunday Fun Run dates
+  // Check if any Fun Run events are on Sunday (day 0) instead of Saturday (day 6)
+  const hasSundayFunRuns = allEvents.some(event => {
+    if (event.title === 'Fun Run' && event.date) {
+      const eventDate = new Date(event.date + 'T12:00:00'); // Use noon to avoid timezone issues
+      return eventDate.getDay() === 0; // Sunday = 0
+    }
+    return false;
+  });
+
+  // If we found Sunday Fun Runs, clear cache and use fresh defaults
+  if (hasSundayFunRuns) {
+    console.log('Detected old Sunday Fun Run dates in cache - clearing and reloading...');
+    localStorage.removeItem(KEYS.EVENTS);
+    allEvents = DEFAULT_EVENTS;
+  }
 
   // Filter out past events
   const currentEvents = allEvents.filter(event => event.date >= todayStr);
