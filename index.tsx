@@ -1,16 +1,40 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import App from './App';
 
-// Minimal test to verify React mounting works
-const App = () => {
-  return (
-    <div style={{ color: 'white', padding: '50px', fontSize: '24px' }}>
-      <h1>PETTYFITNESS 22 - TEST</h1>
-      <p>If you can see this, React is working!</p>
-    </div>
-  );
-};
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('React Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ color: 'white', padding: '50px' }}>
+          <h1>Something went wrong</h1>
+          <p>Error: {this.state.error?.message}</p>
+          <pre>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -20,6 +44,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </React.StrictMode>
 );
