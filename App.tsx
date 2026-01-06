@@ -5,7 +5,7 @@ import Hero from './components/Hero';
 import PricingSection from './components/PricingSection';
 import TestimonialSection from './components/TestimonialSection';
 import EventList from './components/EventList';
-// import GymMap from './components/GymMap'; // TODO: Fix Leaflet loading issue
+import GymMap from './components/GymMap';
 import ClientDashboard from './components/ClientDashboard';
 import TrainerDashboard from './components/TrainerDashboard';
 import { User, UserRole } from './types';
@@ -49,7 +49,7 @@ const App: React.FC = () => {
             <PricingSection />
             <TestimonialSection />
             <EventList />
-            {/* GymMap temporarily disabled - needs Leaflet loading fix */}
+            <GymMap />
           </>
         ) : (
           <div className="container mx-auto px-4 py-12">

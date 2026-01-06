@@ -10,6 +10,12 @@ const GymMap: React.FC = () => {
   const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
+    // Safety check: Ensure Leaflet library is loaded
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet library not loaded yet - map will not initialize');
+      return;
+    }
+
     if (mapContainerRef.current && !mapInstanceRef.current) {
       // Initialize Leaflet map
       mapInstanceRef.current = L.map(mapContainerRef.current, {
@@ -73,7 +79,7 @@ const GymMap: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-left duration-700">
             <span className="text-orange-brand font-bold tracking-widest uppercase text-sm">Find Us</span>
             <h2 className="font-bebas text-6xl italic mt-2 mb-8">CONTACT HUB.</h2>
-            
+
             <div className="space-y-8">
               <div className="flex items-start space-x-6 group">
                 <div className="bg-zinc-900 p-4 rounded-xl border border-zinc-800 group-hover:border-orange-brand/50 transition-colors">
@@ -103,10 +109,10 @@ const GymMap: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-lg mb-1">Follow The Progress</h4>
-                  <a 
-                    href={GYM_LOCATION.instagramUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={GYM_LOCATION.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-orange-brand text-sm font-bold hover:underline"
                   >
                     Instagram: {GYM_LOCATION.instagram}
@@ -119,7 +125,7 @@ const GymMap: React.FC = () => {
           <div className="relative rounded-3xl overflow-hidden h-[500px] border border-zinc-800 shadow-2xl animate-in fade-in slide-in-from-right duration-700">
             {/* Map Container */}
             <div ref={mapContainerRef} className="w-full h-full z-0" />
-            
+
             {/* Top Gradient Overlay for depth */}
             <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/20 to-transparent pointer-events-none z-10" />
           </div>
