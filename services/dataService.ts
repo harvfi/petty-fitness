@@ -24,6 +24,38 @@ const dayAfterTomorrow = new Date(today);
 dayAfterTomorrow.setDate(today.getDate() + 2);
 const dayAfterStr = dayAfterTomorrow.toISOString().split('T')[0];
 
+// Generate Fun Run events for every Saturday for the next 8 weeks
+const generateSaturdayFunRuns = (): GymEvent[] => {
+  const saturdays: GymEvent[] = [];
+  const currentDate = new Date(today);
+
+  // Find the next Saturday
+  const daysUntilSaturday = (6 - currentDate.getDay() + 7) % 7;
+  if (daysUntilSaturday === 0 && currentDate.getDay() === 6) {
+    // If today is Saturday, start from today
+    currentDate.setDate(currentDate.getDate());
+  } else {
+    currentDate.setDate(currentDate.getDate() + daysUntilSaturday);
+  }
+
+  // Generate 8 Saturday events
+  for (let i = 0; i < 8; i++) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    saturdays.push({
+      id: `fun-run-saturday-${i + 1}`,
+      title: 'Fun Run',
+      description: 'Weekly community fun run at YMCA Kings Mountain, NC. All fitness levels welcome!',
+      date: dateStr,
+      time: '01:00 PM',
+      category: 'Special'
+    });
+    // Move to next Saturday
+    currentDate.setDate(currentDate.getDate() + 7);
+  }
+
+  return saturdays;
+};
+
 const DEFAULT_TESTIMONIALS: Testimonial[] = [
   {
     id: '1',
@@ -42,14 +74,7 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
 ];
 
 const DEFAULT_EVENTS: GymEvent[] = [
-  {
-    id: 'fun-run-saturday',
-    title: 'Fun Run',
-    description: 'Weekly community fun run at YMCA Kings Mountain, NC. All fitness levels welcome!',
-    date: '2026-01-11', // Next Saturday
-    time: '01:00 PM',
-    category: 'Special'
-  },
+  ...generateSaturdayFunRuns(), // Add all Saturday Fun Runs
   {
     id: 'special-5k-shelby',
     title: 'YMCA 5K Run',
