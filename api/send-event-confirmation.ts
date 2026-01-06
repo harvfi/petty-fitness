@@ -3,6 +3,7 @@ import Twilio from 'twilio';
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+const trainerNumber = process.env.TRAINER_PHONE_NUMBER || '9804216801';
 
 export default async function handler(req: any, res: any) {
     // Only allow POST requests
@@ -27,6 +28,8 @@ export default async function handler(req: any, res: any) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        const client = Twilio(accountSid, authToken);
+
         // Determine if contactInfo is email or phone
         const isEmail = contactInfo.includes('@');
         const isPhone = /^\+?[\d\s\-\(\)]+$/.test(contactInfo);
@@ -34,13 +37,11 @@ export default async function handler(req: any, res: any) {
         let confirmationSent = false;
         let method = '';
 
-        // Send SMS if it's a phone number
+        // Send confirmation SMS to user if it's a phone number
         if (isPhone) {
             try {
-                const client = Twilio(accountSid, authToken);
-
-                // Format the confirmation message
-                const message = `✅ RESERVATION CONFIRMED\n\n${userName || 'Guest'}, you're all set for:\n\n📅 ${eventTitle}\n🗓️ ${new Date(eventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\n⏰ ${eventTime}\n\nSee you there! 💪\n\n- PettyFitness 22`;
+                // Format the confirmation message for user
+                const userMessage = `✅ RESERVATION CONFIRMED\n\n${userName || 'Guest'}, you're all set for:\n\n📅 ${eventTitle}\n🗓️ ${new Date(eventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\n⏰ ${eventTime}\n\nSee you there! 💪\n\n- PettyFitness 22`;
 
                 // Ensure phone number is in E.164 format
                 let phoneNumber = contactInfo.replace(/[\s\-\(\)]/g, '');
@@ -49,16 +50,16 @@ export default async function handler(req: any, res: any) {
                 }
 
                 await client.messages.create({
-                    body: message,
+                    body: userMessage,
                     from: fromNumber,
                     to: phoneNumber
                 });
 
                 confirmationSent = true;
                 method = 'SMS';
-                console.log('SMS confirmation sent to:', phoneNumber);
+                console.log('SMS confirmation sent to user:', phoneNumber);
             } catch (smsError: any) {
-                console.error('SMS sending failed:', smsError);
+                console.error('SMS sending to user failed:', smsError);
                 // Continue to try email if SMS fails
             }
         }
@@ -70,6 +71,28 @@ export default async function handler(req: any, res: any) {
             console.log('Email confirmation would be sent to:', contactInfo);
             confirmationSent = true;
             method = 'Email (simulated)';
+        }
+
+        // ALWAYS send notification to trainer (9804216801)
+        try {
+            const trainerMessage = `📅 NEW EVENT RSVP\n\nClient: ${userName || 'Guest'}\nContact: ${contactInfo}\n\nEvent: ${eventTitle}\nDate: ${new Date(eventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\nTime: ${eventTime}\n\nBooked: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}`;
+
+            // Format trainer number
+            let trainerPhone = trainerNumber.replace(/[\s\-\(\)]/g, '');
+            if (!trainerPhone.startsWith('+')) {
+                trainerPhone = '+1' + trainerPhone;
+            }
+
+            await client.messages.create({
+                body: trainerMessage,
+                from: fromNumber,
+                to: trainerPhone
+            });
+
+            console.log('Trainer notification sent to:', trainerPhone);
+        } catch (trainerError: any) {
+            console.error('Failed to send trainer notification:', trainerError);
+            // Don't fail the request if trainer notification fails
         }
 
         if (confirmationSent) {
