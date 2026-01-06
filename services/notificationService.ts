@@ -43,3 +43,57 @@ export const notifyTrainerPlanSelection = (clientName: string, planTitle: string
     });
   }
 };
+
+// SMS Notification Functions
+
+interface SMSNotificationData {
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
+  planTitle?: string;
+  action: 'booking' | 'plan_selection';
+}
+
+export const sendSMSNotification = async (data: SMSNotificationData): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await fetch('/api/send-sms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('SMS notification failed:', result);
+      return { success: false, error: result.error || 'Failed to send SMS' };
+    }
+
+    console.log('SMS notification sent successfully:', result);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending SMS notification:', error);
+    return { success: false, error: error.message || 'Network error' };
+  }
+};
+
+export const sendBookingSMS = async (userName: string, userEmail: string, userPhone?: string) => {
+  return sendSMSNotification({
+    userName,
+    userEmail,
+    userPhone,
+    action: 'booking'
+  });
+};
+
+export const sendPlanSelectionSMS = async (userName: string, userEmail: string, planTitle: string, userPhone?: string) => {
+  return sendSMSNotification({
+    userName,
+    userEmail,
+    userPhone,
+    planTitle,
+    action: 'plan_selection'
+  });
+};

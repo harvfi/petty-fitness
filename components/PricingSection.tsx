@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { selectPlan, getTrainer, login } from '../services/dataService';
-import { notifyTrainerPlanSelection } from '../services/notificationService';
+import { notifyTrainerPlanSelection, sendPlanSelectionSMS } from '../services/notificationService';
+import BookingForm from './BookingForm';
 
 interface PricingSectionProps {
   user: User | null;
@@ -12,6 +13,8 @@ interface PricingSectionProps {
 const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmedPlan, setConfirmedPlan] = useState<string>('');
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [selectedPlanForBooking, setSelectedPlanForBooking] = useState<string>('');
 
   const services = [
     "Personal Training",
@@ -38,13 +41,40 @@ const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
       return;
     }
 
+    // Show booking form to collect user details
+    setSelectedPlanForBooking(planTitle);
+    setShowBookingForm(true);
+  };
+
+  const handleBookingFormSubmit = async (formData: { name: string; email: string; phone: string }) => {
+    if (!user) return;
+
+    const planTitle = selectedPlanForBooking;
+
     // Update user's plan
     selectPlan(user.id, planTitle);
 
-    // Notify trainer
+    // Send browser notification to trainer
     const trainer = getTrainer();
     if (trainer) {
-      notifyTrainerPlanSelection(user.name, planTitle);
+      notifyTrainerPlanSelection(formData.name, planTitle);
+    }
+
+    // Send SMS notification
+    try {
+      const result = await sendPlanSelectionSMS(
+        formData.name,
+        formData.email,
+        planTitle,
+        formData.phone
+      );
+
+      if (!result.success) {
+        console.error('Failed to send SMS notification:', result.error);
+        // Still show confirmation even if SMS fails
+      }
+    } catch (error) {
+      console.error('Error sending SMS notification:', error);
     }
 
     // Show confirmation
@@ -56,6 +86,15 @@ const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
   return (
     <section id="pricing-plans" className="py-24 bg-black border-t border-zinc-900 relative">
       <div className="container mx-auto px-4">
+        {/* Booking Form Modal */}
+        <BookingForm
+          isOpen={showBookingForm}
+          onClose={() => setShowBookingForm(false)}
+          onSubmit={handleBookingFormSubmit}
+          planTitle={selectedPlanForBooking}
+          actionType="plan_selection"
+        />
+
         {/* Confirmation Toast */}
         {showConfirmation && (
           <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top duration-300">
@@ -102,8 +141,8 @@ const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
                 <div
                   key={i}
                   className={`bg-zinc-900 border p-8 rounded-[2.5rem] flex flex-col items-center text-center transition-all group relative ${isSelected
-                      ? 'border-[#d4ff00] shadow-[0_0_30px_rgba(212,255,0,0.3)]'
-                      : 'border-zinc-800 hover:border-orange-brand/50'
+                    ? 'border-[#d4ff00] shadow-[0_0_30px_rgba(212,255,0,0.3)]'
+                    : 'border-zinc-800 hover:border-orange-brand/50'
                     }`}
                 >
                   {isSelected && (
@@ -122,8 +161,8 @@ const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
                   <button
                     onClick={() => handleSelectPlan(plan.title)}
                     className={`w-full mt-auto font-black py-4 rounded-2xl uppercase text-xs tracking-widest transition-all ${isSelected
-                        ? 'bg-[#d4ff00] text-black hover:bg-[#c4ef00]'
-                        : 'bg-white text-black hover:bg-orange-brand'
+                      ? 'bg-[#d4ff00] text-black hover:bg-[#c4ef00]'
+                      : 'bg-white text-black hover:bg-orange-brand'
                       }`}
                   >
                     {isSelected ? 'Current Plan' : 'Select Plan'}

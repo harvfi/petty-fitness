@@ -1,11 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { login } from '../services/dataService';
+import { sendBookingSMS } from '../services/notificationService';
+import BookingForm from './BookingForm';
 
 interface HeroProps {
   onJoin: () => void;
 }
 
 const Hero: React.FC<HeroProps> = ({ onJoin }) => {
+  const [showBookingForm, setShowBookingForm] = useState(false);
+
   const handleScrollToPrices = () => {
     const element = document.getElementById('pricing-plans');
     if (element) {
@@ -13,12 +18,44 @@ const Hero: React.FC<HeroProps> = ({ onJoin }) => {
     }
   };
 
+  const handleBookWithMe = () => {
+    setShowBookingForm(true);
+  };
+
+  const handleBookingFormSubmit = async (formData: { name: string; email: string; phone: string }) => {
+    // Log the user in
+    onJoin();
+
+    // Send SMS notification
+    try {
+      const result = await sendBookingSMS(
+        formData.name,
+        formData.email,
+        formData.phone
+      );
+
+      if (!result.success) {
+        console.error('Failed to send SMS notification:', result.error);
+      }
+    } catch (error) {
+      console.error('Error sending SMS notification:', error);
+    }
+  };
+
   return (
     <section className="relative h-[85vh] flex items-center overflow-hidden bg-black">
+      {/* Booking Form Modal */}
+      <BookingForm
+        isOpen={showBookingForm}
+        onClose={() => setShowBookingForm(false)}
+        onSubmit={handleBookingFormSubmit}
+        actionType="booking"
+      />
+
       <div className="absolute inset-0 z-0">
-        <img 
-          src="https://picsum.photos/seed/fitness-focus/1920/1080" 
-          alt="Gym background" 
+        <img
+          src="https://picsum.photos/seed/fitness-focus/1920/1080"
+          alt="Gym background"
           className="w-full h-full object-cover opacity-30 grayscale contrast-125"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
@@ -34,13 +71,13 @@ const Hero: React.FC<HeroProps> = ({ onJoin }) => {
             Because the harder you work, the easier the work becomes... If you're looking to get in shape, lose weight, and learn new techniques, come see me!
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <button 
-              onClick={onJoin}
+            <button
+              onClick={handleBookWithMe}
               className="bg-orange-brand text-black font-black py-5 px-12 rounded-2xl text-lg uppercase transition-all hover:scale-105 orange-glow"
             >
               Book With Me
             </button>
-            <button 
+            <button
               onClick={handleScrollToPrices}
               className="border-2 border-white/20 hover:border-orange-brand hover:text-orange-brand text-white font-black py-5 px-12 rounded-2xl text-lg uppercase transition-all"
             >
