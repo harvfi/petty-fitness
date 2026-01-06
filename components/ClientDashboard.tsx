@@ -137,15 +137,44 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
     e.preventDefault();
     const form = e.target as any;
     const desc = form.description.value;
-    setIsAnalyzingFood(true);
-    const analysis = await analyzeFood(desc);
-    if (analysis) {
-      const entry: FoodEntry = { id: Date.now().toString(), userId: user.id, date: new Date().toISOString().split('T')[0], name: analysis.name, facts: analysis.facts };
-      saveFoodEntry(entry);
-      setFoodEntries([entry, ...foodEntries]);
-      setShowAddFood(false);
+
+    if (!desc.trim()) {
+      alert('Please enter a food description');
+      return;
     }
-    setIsAnalyzingFood(false);
+
+    setIsAnalyzingFood(true);
+
+    try {
+      const analysis = await analyzeFood(desc);
+
+      if (analysis) {
+        const entry: FoodEntry = {
+          id: Date.now().toString(),
+          userId: user.id,
+          date: new Date().toISOString().split('T')[0],
+          name: analysis.name,
+          facts: analysis.facts
+        };
+
+        saveFoodEntry(entry);
+        setFoodEntries([entry, ...foodEntries]);
+
+        // Reset form and close
+        form.reset();
+        setShowAddFood(false);
+
+        // Show success message
+        alert(`✅ Food logged successfully!\n\n${analysis.name}\nCalories: ${analysis.facts.calories} kcal\nProtein: ${analysis.facts.protein}g | Carbs: ${analysis.facts.carbs}g | Fat: ${analysis.facts.fat}g`);
+      } else {
+        alert('❌ Could not analyze food. Please make sure the GEMINI_API_KEY is configured on Vercel, or try describing the food differently.');
+      }
+    } catch (error) {
+      console.error('Error analyzing food:', error);
+      alert('❌ Error analyzing food. Please check that the GEMINI_API_KEY is configured on Vercel.');
+    } finally {
+      setIsAnalyzingFood(false);
+    }
   };
 
   return (
