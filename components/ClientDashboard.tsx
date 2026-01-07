@@ -398,6 +398,95 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
                   <button type="submit" className="w-full mt-8 bg-[#d4ff00] text-black font-black py-5 rounded-xl uppercase tracking-widest hover:brightness-110 transition shadow-lg active:scale-[0.98]">Record Performance</button>
                 </form>
               )}
+
+              {/* Workout Log Table */}
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-zinc-800">
+                  <h3 className="font-bebas text-2xl italic uppercase tracking-tight">Training Log History</h3>
+                  <p className="text-xs text-zinc-500 uppercase font-bold tracking-widest mt-1">All Recorded Sessions</p>
+                </div>
+
+                {workouts.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-black/50">
+                          <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500">Date</th>
+                          <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500">Exercise</th>
+                          <th className="text-right px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500">Sets</th>
+                          <th className="text-right px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500">Reps</th>
+                          <th className="text-right px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500">Weight (kg)</th>
+                          <th className="text-right px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500">Volume</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {workouts.map((w, index) => (
+                          <tr
+                            key={w.id}
+                            className={`border-t border-zinc-800/50 hover:bg-zinc-800/30 transition-colors ${index % 2 === 0 ? 'bg-zinc-900/20' : ''}`}
+                          >
+                            <td className="px-6 py-4 text-sm text-zinc-400 font-medium">
+                              {new Date(w.date).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="font-bold text-white uppercase text-sm tracking-tight">{w.exercise}</span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="font-bold text-blue-400">{w.sets}</span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="font-bold text-green-400">{w.reps}</span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="font-bebas text-xl text-[#d4ff00]">{w.weight}</span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="font-bold text-purple-400">{w.sets * w.reps * w.weight}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-black/50 border-t-2 border-[#d4ff00]/30">
+                          <td className="px-6 py-4 text-xs font-black uppercase tracking-widest text-zinc-500" colSpan={2}>
+                            Total ({workouts.length} sessions)
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="font-bold text-blue-400 text-lg">
+                              {workouts.reduce((sum, w) => sum + w.sets, 0)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="font-bold text-green-400 text-lg">
+                              {workouts.reduce((sum, w) => sum + w.reps, 0)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="font-bebas text-2xl text-[#d4ff00]">
+                              {Math.round(workouts.reduce((sum, w) => sum + w.weight, 0) / workouts.length) || 0}
+                            </span>
+                            <span className="text-xs text-zinc-500 ml-1">avg</span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <span className="font-bold text-purple-400 text-lg">
+                              {workouts.reduce((sum, w) => sum + (w.sets * w.reps * w.weight), 0)}
+                            </span>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-12 text-center">
+                    <p className="text-zinc-600 italic text-sm">No workouts logged yet. Start tracking your training!</p>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-zinc-900/50 p-8 rounded-2xl border border-zinc-800 h-[400px]">
                 <h3 className="font-bold text-xl mb-6 uppercase italic">Load Progression</h3>
                 <ResponsiveContainer width="100%" height="80%"><LineChart data={[...workouts].slice(0, 10).reverse().map(w => ({ name: w.date.split('-')[2], weight: w.weight }))}><CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} /><XAxis dataKey="name" stroke="#666" tick={{ fontSize: 10 }} /><YAxis stroke="#666" tick={{ fontSize: 10 }} /><Tooltip contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '12px' }} /><Line type="monotone" dataKey="weight" stroke="#d4ff00" strokeWidth={3} dot={{ fill: '#d4ff00', r: 4 }} activeDot={{ r: 6 }} /></LineChart></ResponsiveContainer>
