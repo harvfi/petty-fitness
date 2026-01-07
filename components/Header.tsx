@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { login } from '../services/dataService';
 import { getNotificationStatus, requestNotificationPermission } from '../services/notificationService';
-import { sendBookingSMS } from '../services/notificationService';
+import { sendBookingEmail } from '../services/notificationService';
 import BookingForm from './BookingForm';
 
 interface HeaderProps {
@@ -35,9 +35,9 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, setView, curre
     // Log the user in
     onLogin(login(UserRole.CLIENT));
 
-    // Send SMS notification to trainer
+    // Send email notification to trainer
     try {
-      const result = await sendBookingSMS(
+      const result = await sendBookingEmail(
         formData.name,
         formData.email,
         formData.phone,
@@ -45,10 +45,10 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, setView, curre
       );
 
       if (!result.success) {
-        console.error('Failed to send SMS notification:', result.error);
+        console.error('Failed to send email notification:', result.error);
       }
     } catch (error) {
-      console.error('Error sending SMS notification:', error);
+      console.error('Error sending email notification:', error);
     }
   };
 

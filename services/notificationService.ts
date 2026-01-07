@@ -99,3 +99,59 @@ export const sendPlanSelectionSMS = async (userName: string, userEmail: string, 
     action: 'plan_selection'
   });
 };
+
+// Email Notification Functions
+
+interface EmailNotificationData {
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
+  planTitle?: string;
+  bookingDate?: string;
+  action: 'booking' | 'plan_selection';
+}
+
+export const sendEmailNotification = async (data: EmailNotificationData): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Email notification failed:', result);
+      return { success: false, error: result.error || 'Failed to send email' };
+    }
+
+    console.log('Email notification sent successfully:', result);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending email notification:', error);
+    return { success: false, error: error.message || 'Network error' };
+  }
+};
+
+export const sendBookingEmail = async (userName: string, userEmail: string, userPhone?: string, bookingDate?: string) => {
+  return sendEmailNotification({
+    userName,
+    userEmail,
+    userPhone,
+    bookingDate,
+    action: 'booking'
+  });
+};
+
+export const sendPlanSelectionEmail = async (userName: string, userEmail: string, planTitle: string, userPhone?: string) => {
+  return sendEmailNotification({
+    userName,
+    userEmail,
+    userPhone,
+    planTitle,
+    action: 'plan_selection'
+  });
+};

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { User, UserRole } from '../types';
 import { selectPlan, getTrainer, login } from '../services/dataService';
-import { notifyTrainerPlanSelection, sendPlanSelectionSMS } from '../services/notificationService';
+import { notifyTrainerPlanSelection, sendPlanSelectionEmail } from '../services/notificationService';
 import BookingForm from './BookingForm';
 
 interface PricingSectionProps {
@@ -60,9 +60,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
       notifyTrainerPlanSelection(formData.name, planTitle);
     }
 
-    // Send SMS notification
+    // Send email notification
     try {
-      const result = await sendPlanSelectionSMS(
+      const result = await sendPlanSelectionEmail(
         formData.name,
         formData.email,
         planTitle,
@@ -70,11 +70,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({ user, onLogin }) => {
       );
 
       if (!result.success) {
-        console.error('Failed to send SMS notification:', result.error);
-        // Still show confirmation even if SMS fails
+        console.error('Failed to send email notification:', result.error);
+        // Still show confirmation even if email fails
       }
     } catch (error) {
-      console.error('Error sending SMS notification:', error);
+      console.error('Error sending email notification:', error);
     }
 
     // Show confirmation

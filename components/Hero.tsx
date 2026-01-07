@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { login } from '../services/dataService';
-import { sendBookingSMS } from '../services/notificationService';
+import { sendBookingEmail } from '../services/notificationService';
 import BookingForm from './BookingForm';
 
 interface HeroProps {
@@ -26,9 +26,9 @@ const Hero: React.FC<HeroProps> = ({ onJoin }) => {
     // Log the user in
     onJoin();
 
-    // Send SMS notification with booking date
+    // Send email notification with booking date
     try {
-      const result = await sendBookingSMS(
+      const result = await sendBookingEmail(
         formData.name,
         formData.email,
         formData.phone,
@@ -36,10 +36,10 @@ const Hero: React.FC<HeroProps> = ({ onJoin }) => {
       );
 
       if (!result.success) {
-        console.error('Failed to send SMS notification:', result.error);
+        console.error('Failed to send email notification:', result.error);
       }
     } catch (error) {
-      console.error('Error sending SMS notification:', error);
+      console.error('Error sending email notification:', error);
     }
   };
 
