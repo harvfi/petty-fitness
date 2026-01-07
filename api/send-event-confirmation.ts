@@ -1,9 +1,7 @@
-import Twilio from 'twilio';
+import { Resend } from 'resend';
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const fromNumber = process.env.TWILIO_PHONE_NUMBER;
-const trainerNumber = process.env.TRAINER_PHONE_NUMBER || '9804216801';
+const resend = new Resend(process.env.RESEND_API_KEY);
+const trainerEmail = process.env.TRAINER_EMAIL || 'Patpat8526@yahoo.com';
 
 export default async function handler(req: any, res: any) {
     // Only allow POST requests
@@ -12,11 +10,11 @@ export default async function handler(req: any, res: any) {
     }
 
     // Validate environment variables
-    if (!accountSid || !authToken || !fromNumber) {
-        console.error('Missing Twilio credentials');
+    if (!process.env.RESEND_API_KEY) {
+        console.error('Missing Resend API key');
         return res.status(500).json({
-            error: 'SMS service not configured',
-            details: 'Missing Twilio credentials'
+            error: 'Email service not configured',
+            details: 'Missing RESEND_API_KEY'
         });
     }
 
@@ -28,78 +26,83 @@ export default async function handler(req: any, res: any) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const client = Twilio(accountSid, authToken);
+        const formattedDate = new Date(eventDate + 'T00:00:00').toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
 
         // Determine if contactInfo is email or phone
         const isEmail = contactInfo.includes('@');
-        const isPhone = /^\+?[\d\s\-\(\)]+$/.test(contactInfo);
 
         let confirmationSent = false;
         let method = '';
 
-        // Send confirmation SMS to user if it's a phone number
-        if (isPhone) {
+        // Send confirmation email to user if they provided an email
+        if (isEmail) {
             try {
-                // Format the confirmation message for user
-                const userMessage = `✅ RESERVATION CONFIRMED\n\n${userName || 'Guest'}, you're all set for:\n\n📅 ${eventTitle}\n🗓️ ${new Date(eventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\n⏰ ${eventTime}\n\nSee you there! 💪\n\n- PettyFitness 22`;
-
-                // Ensure phone number is in E.164 format
-                let phoneNumber = contactInfo.replace(/[\s\-\(\)]/g, '');
-                if (!phoneNumber.startsWith('+')) {
-                    phoneNumber = '+1' + phoneNumber; // Assume US number if no country code
-                }
-
-                await client.messages.create({
-                    body: userMessage,
-                    from: fromNumber,
-                    to: phoneNumber
+                await resend.emails.send({
+                    from: 'PettyFitness 22 <notifications@pettyfitness22.com>',
+                    to: [contactInfo],
+                    subject: `✅ Reservation Confirmed - ${eventTitle}`,
+                    html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ff8c37;">✅ RESERVATION CONFIRMED</h2>
+              <p>Hi ${userName || 'there'},</p>
+              <p>You're all set for:</p>
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>📅 Event:</strong> ${eventTitle}</p>
+                <p><strong>🗓️ Date:</strong> ${formattedDate}</p>
+                <p><strong>⏰ Time:</strong> ${eventTime}</p>
+              </div>
+              <p>See you there! 💪</p>
+              <p style="color: #666; font-size: 12px; margin-top: 30px;">- PettyFitness 22</p>
+            </div>
+          `,
                 });
 
                 confirmationSent = true;
-                method = 'SMS';
-                console.log('SMS confirmation sent to user:', phoneNumber);
-            } catch (smsError: any) {
-                console.error('SMS sending to user failed:', smsError);
-                // Continue to try email if SMS fails
+                method = 'Email';
+                console.log('Email confirmation sent to user:', contactInfo);
+            } catch (emailError: any) {
+                console.error('Email sending to user failed:', emailError);
             }
         }
 
-        // If email or SMS failed, note that email would be sent here
-        if (isEmail && !confirmationSent) {
-            // In a real implementation, you would send an email here
-            // For now, we'll just log it
-            console.log('Email confirmation would be sent to:', contactInfo);
-            confirmationSent = true;
-            method = 'Email (simulated)';
-        }
-
-        // ALWAYS send notification to trainer (9804216801)
+        // ALWAYS send notification to trainer
         try {
-            const trainerMessage = `📅 NEW EVENT RSVP\n\nClient: ${userName || 'Guest'}\nContact: ${contactInfo}\n\nEvent: ${eventTitle}\nDate: ${new Date(eventDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}\nTime: ${eventTime}\n\nBooked: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}`;
-
-            // Format trainer number
-            let trainerPhone = trainerNumber.replace(/[\s\-\(\)]/g, '');
-            if (!trainerPhone.startsWith('+')) {
-                trainerPhone = '+1' + trainerPhone;
-            }
-
-            await client.messages.create({
-                body: trainerMessage,
-                from: fromNumber,
-                to: trainerPhone
+            await resend.emails.send({
+                from: 'PettyFitness 22 <notifications@pettyfitness22.com>',
+                to: [trainerEmail],
+                subject: `📅 New Event RSVP - ${eventTitle}`,
+                html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #ff8c37;">📅 NEW EVENT RSVP</h2>
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Client:</strong> ${userName || 'Guest'}</p>
+              <p><strong>Contact:</strong> ${contactInfo}</p>
+              <p><strong>Event:</strong> ${eventTitle}</p>
+              <p><strong>Date:</strong> ${formattedDate}</p>
+              <p><strong>Time:</strong> ${eventTime}</p>
+              <p><strong>Booked:</strong> ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })}</p>
+            </div>
+            <p style="color: #666; font-size: 12px;">PettyFitness 22 - Notification System</p>
+          </div>
+        `,
             });
 
-            console.log('Trainer notification sent to:', trainerPhone);
+            console.log('Trainer notification sent to:', trainerEmail);
         } catch (trainerError: any) {
             console.error('Failed to send trainer notification:', trainerError);
             // Don't fail the request if trainer notification fails
         }
 
-        if (confirmationSent) {
+        if (confirmationSent || !isEmail) {
             return res.status(200).json({
                 success: true,
-                method: method,
-                message: `Confirmation sent via ${method}`
+                method: method || 'Notification sent to trainer',
+                message: confirmationSent ? `Confirmation sent via ${method}` : 'Reservation confirmed'
             });
         } else {
             return res.status(200).json({

@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const trainerEmail = process.env.TRAINER_EMAIL || 'trainer@pettyfitness22.com';
+const trainerEmail = process.env.TRAINER_EMAIL || 'Patpat8526@yahoo.com';
 
 export default async function handler(req: any, res: any) {
     // Only allow POST requests
