@@ -69,8 +69,10 @@ export default async function handler(req: any, res: any) {
         }
 
         // Send email to trainer
+        // Using Resend's default domain - works without verification
+        // To use custom domain, verify pettyfitness22.com in Resend dashboard
         const data = await resend.emails.send({
-            from: 'PettyFitness 22 <notifications@pettyfitness22.com>',
+            from: 'PettyFitness 22 <onboarding@resend.dev>',
             to: [trainerEmail],
             subject: subject,
             html: htmlContent,
