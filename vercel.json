@@ -13,5 +13,20 @@
             "source": "/(.*)",
             "destination": "/index.html"
         }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Content-Security-Policy",
+                    "value": "frame-ancestors 'self' https://antigravity.google https://*.google.com;"
+                },
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "https://antigravity.google"
+                }
+            ]
+        }
     ]
 }
