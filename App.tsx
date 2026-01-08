@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import PricingSection from './components/PricingSection';
@@ -75,6 +76,8 @@ const App: React.FC = () => {
           <p className="mt-12 text-zinc-700 text-[9px] font-black uppercase tracking-widest">© 2024 PETTYFITNESS 22. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
+
+      <Analytics />
     </div>
   );
 };
