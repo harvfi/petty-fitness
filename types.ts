@@ -81,3 +81,16 @@ export interface AIWorkoutPlan {
     description: string;
   }[];
 }
+
+export interface Goal {
+  id: string;
+  title: string;
+  description: string;
+  targetDate?: string;
+  assignedTo?: string; // userId of the client
+  createdBy: string; // userId of the trainer
+  createdDate: string;
+  status: 'active' | 'completed' | 'archived';
+  category?: 'Weight Loss' | 'Muscle Gain' | 'Endurance' | 'Flexibility' | 'Other';
+  milestones?: string[]; // Optional sub-goals or checkpoints
+}

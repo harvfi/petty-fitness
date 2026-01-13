@@ -1,5 +1,5 @@
 
-import { Testimonial, GymEvent, Workout, User, UserRole, FoodEntry, StepEntry } from '../types';
+import { Testimonial, GymEvent, Workout, User, UserRole, FoodEntry, StepEntry, Goal } from '../types';
 
 const KEYS = {
   TESTIMONIALS: 'petty_testimonials',
@@ -8,7 +8,8 @@ const KEYS = {
   FOOD: 'petty_food_entries',
   STEPS: 'petty_step_history',
   USER: 'petty_current_user',
-  ALL_USERS: 'petty_all_users'
+  ALL_USERS: 'petty_all_users',
+  GOALS: 'petty_goals'
 };
 
 // Calculate dynamic dates for defaults
@@ -280,4 +281,48 @@ export const selectPlan = (userId: string, planTitle: string): void => {
 export const getTrainer = (): User | null => {
   const users = getUsers();
   return users.find(u => u.role === UserRole.TRAINER) || null;
+};
+
+// Goal Management Functions
+export const getAllGoals = (): Goal[] => {
+  const data = localStorage.getItem(KEYS.GOALS);
+  return data ? JSON.parse(data) : [];
+};
+
+export const getGoalsByClient = (userId: string): Goal[] => {
+  const all = getAllGoals();
+  return all.filter(g => g.assignedTo === userId);
+};
+
+export const getGoalsByTrainer = (trainerId: string): Goal[] => {
+  const all = getAllGoals();
+  return all.filter(g => g.createdBy === trainerId);
+};
+
+export const saveGoal = (goal: Goal) => {
+  const all = getAllGoals();
+  const existing = all.findIndex(g => g.id === goal.id);
+
+  if (existing !== -1) {
+    all[existing] = goal;
+  } else {
+    all.push(goal);
+  }
+
+  localStorage.setItem(KEYS.GOALS, JSON.stringify(all));
+};
+
+export const deleteGoal = (goalId: string) => {
+  const all = getAllGoals();
+  const filtered = all.filter(g => g.id !== goalId);
+  localStorage.setItem(KEYS.GOALS, JSON.stringify(filtered));
+};
+
+export const updateGoalStatus = (goalId: string, status: Goal['status']) => {
+  const all = getAllGoals();
+  const goal = all.find(g => g.id === goalId);
+  if (goal) {
+    goal.status = status;
+    localStorage.setItem(KEYS.GOALS, JSON.stringify(all));
+  }
 };

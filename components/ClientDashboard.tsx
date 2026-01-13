@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { User, Workout, AIWorkoutPlan, FoodEntry, FoodFacts, StepEntry } from '../types';
-import { getWorkouts, saveWorkout, getCurrentUser, getFoodEntries, saveFoodEntry, updateUser, getSteps, saveSteps } from '../services/dataService';
+import { User, Workout, AIWorkoutPlan, FoodEntry, FoodFacts, StepEntry, Goal } from '../types';
+import { getWorkouts, saveWorkout, getCurrentUser, getFoodEntries, saveFoodEntry, updateUser, getSteps, saveSteps, getGoalsByClient, updateGoalStatus } from '../services/dataService';
 import { generateWorkoutPlan, analyzeFood } from '../services/geminiService';
 import { getNotificationStatus, requestNotificationPermission, sendActivityNotification } from '../services/notificationService';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
@@ -25,6 +25,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAnalyzingFood, setIsAnalyzingFood] = useState(false);
   const [aiPlan, setAiPlan] = useState<AIWorkoutPlan | null>(null);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastAccelRef = useRef<number>(0);
@@ -42,6 +43,9 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
 
     const fetchedSteps = getSteps(user.id);
     setStepEntries(fetchedSteps);
+
+    const fetchedGoals = getGoalsByClient(user.id);
+    setGoals(fetchedGoals);
 
     const today = new Date().toISOString().split('T')[0];
     const todaySteps = fetchedSteps.find(s => s.date === today);
@@ -229,6 +233,12 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
 
     // Close form
     setShowAddWorkout(false);
+  };
+
+  const handleToggleGoalStatus = (goalId: string, currentStatus: Goal['status']) => {
+    const newStatus = currentStatus === 'completed' ? 'active' : 'completed';
+    updateGoalStatus(goalId, newStatus);
+    setGoals(getGoalsByClient(user.id));
   };
 
   return (
@@ -555,6 +565,67 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* My Goals Section - Shows when in training tab and has goals */}
+      {activeTab === 'training' && goals.length > 0 && (
+        <div className="space-y-6 animate-in fade-in duration-500">
+          <h2 className="font-bebas text-4xl italic">MY GOALS</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {goals.map((goal) => (
+              <div
+                key={goal.id}
+                className={`bg-zinc-900 border rounded-3xl p-8 transition-all ${goal.status === 'completed'
+                    ? 'border-green-500/30 bg-green-500/5'
+                    : 'border-zinc-800 hover:border-[#d4ff00]/30'
+                  }`}
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="text-2xl font-bold text-white">{goal.title}</h3>
+                      {goal.category && (
+                        <span className="px-3 py-1 bg-[#d4ff00]/10 border border-[#d4ff00]/20 text-[#d4ff00] text-[10px] font-black uppercase rounded-lg">
+                          {goal.category}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-zinc-400 text-sm mb-4">{goal.description}</p>
+                    {goal.targetDate && (
+                      <p className="text-zinc-500 text-xs mb-3">
+                        Target: {new Date(goal.targetDate).toLocaleDateString()}
+                      </p>
+                    )}
+                    {goal.milestones && goal.milestones.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-2">
+                          Milestones:
+                        </p>
+                        <ul className="space-y-2">
+                          {goal.milestones.map((milestone, idx) => (
+                            <li key={idx} className="text-zinc-400 text-xs flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 bg-[#d4ff00] rounded-full"></span>
+                              {milestone}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleToggleGoalStatus(goal.id, goal.status)}
+                  className={`w-full mt-4 py-3 rounded-xl font-bold uppercase text-xs transition-all ${goal.status === 'completed'
+                      ? 'bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30'
+                      : 'bg-[#d4ff00] text-black hover:brightness-110'
+                    }`}
+                >
+                  {goal.status === 'completed' ? '✓ Completed' : 'Mark as Complete'}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}
