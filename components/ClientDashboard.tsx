@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { User, Workout, AIWorkoutPlan, FoodEntry, FoodFacts, StepEntry, Goal } from '../types';
-import { getWorkouts, saveWorkout, getCurrentUser, getFoodEntries, saveFoodEntry, updateUser, getSteps, saveSteps, getGoalsByClient, updateGoalStatus } from '../services/dataService';
+import { User, Workout, AIWorkoutPlan, FoodEntry, FoodFacts, StepEntry, Goal, Testimonial } from '../types';
+import { getWorkouts, saveWorkout, getCurrentUser, getFoodEntries, saveFoodEntry, updateUser, getSteps, saveSteps, getGoalsByClient, updateGoalStatus, saveTestimonial } from '../services/dataService';
 import { generateWorkoutPlan, analyzeFood } from '../services/geminiService';
 import { getNotificationStatus, requestNotificationPermission, sendActivityNotification } from '../services/notificationService';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import ReviewForm from './ReviewForm';
 
 interface ClientDashboardProps {
   user: User;
@@ -26,6 +27,11 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
   const [isAnalyzingFood, setIsAnalyzingFood] = useState(false);
   const [aiPlan, setAiPlan] = useState<AIWorkoutPlan | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
+
+  // Review state
+  const [reviewText, setReviewText] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const lastAccelRef = useRef<number>(0);
@@ -284,6 +290,28 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
     };
     exportData([allData], `${user.name}_complete_data`);
     alert('✅ All data exported successfully!');
+  };
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewText.trim()) {
+      alert('Please write a review before submitting.');
+      return;
+    }
+
+    const newReview: Testimonial = {
+      id: `review-${Date.now()}`,
+      name: user.name,
+      content: reviewText,
+      date: new Date().toISOString(),
+    };
+
+    saveTestimonial(newReview);
+    setReviewText('');
+    setReviewRating(5);
+    setReviewSubmitted(true);
+
+    setTimeout(() => setReviewSubmitted(false), 5000);
   };
 
   return (
@@ -756,6 +784,11 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
             </div>
           </div>
         </div>
+      )}
+
+      {/* Review Section in Settings */}
+      {activeTab === 'settings' && (
+        <ReviewForm userName={user.name} />
       )}
 
       {/* Movement tab logic... */}
