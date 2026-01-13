@@ -53,10 +53,23 @@ const App: React.FC = () => {
           </>
         ) : (
           <div className="container mx-auto px-4 py-12">
-            {user?.role === UserRole.CLIENT ? (
+            {user?.role === UserRole.CLIENT && (
               <ClientDashboard user={user} />
-            ) : (
-              <TrainerDashboard user={user!} />
+            )}
+            {user?.role === UserRole.TRAINER && (
+              <TrainerDashboard user={user} />
+            )}
+            {!user && (
+              <div className="text-center py-20">
+                <h2 className="font-bebas text-4xl italic mb-4">Access Denied</h2>
+                <p className="text-zinc-500 mb-8">Please log in to access the dashboard.</p>
+                <button
+                  onClick={() => setView('home')}
+                  className="bg-orange-brand text-black px-8 py-3 rounded-xl font-bold uppercase text-sm"
+                >
+                  Return to Home
+                </button>
+              </div>
             )}
           </div>
         )}

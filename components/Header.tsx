@@ -65,9 +65,14 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, setView, curre
         <nav className="hidden md:flex items-center space-x-10 font-bold text-[10px] uppercase tracking-[0.2em]">
           <button onClick={() => setView('home')} className={`hover:text-orange-brand transition ${currentView === 'home' ? 'text-orange-brand' : 'text-zinc-500'}`}>Portal</button>
           <button onClick={() => document.getElementById('pricing-plans')?.scrollIntoView({ behavior: 'smooth' })} className="text-zinc-500 hover:text-orange-brand transition">Rates</button>
-          {user && (
+          {user && user.role === UserRole.TRAINER && (
             <button onClick={() => setView('dashboard')} className={`hover:text-orange-brand transition ${currentView === 'dashboard' ? 'text-orange-brand' : 'text-zinc-500'}`}>
-              {user.role === UserRole.TRAINER ? 'Coach View' : 'My Progress'}
+              Coach View
+            </button>
+          )}
+          {user && user.role === UserRole.CLIENT && (
+            <button onClick={() => setView('dashboard')} className={`hover:text-orange-brand transition ${currentView === 'dashboard' ? 'text-orange-brand' : 'text-zinc-500'}`}>
+              My Progress
             </button>
           )}
         </nav>
@@ -93,7 +98,9 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, setView, curre
             </div>
           ) : (
             <div className="flex items-center space-x-4">
-              <span className="text-zinc-600 text-[10px] font-black uppercase hidden lg:inline">Athlete: {user.name}</span>
+              <span className="text-zinc-600 text-[10px] font-black uppercase hidden lg:inline">
+                {user.role === UserRole.TRAINER ? 'Coach' : 'Athlete'}: {user.name}
+              </span>
               <button
                 onClick={onLogout}
                 className="text-zinc-500 hover:text-white transition text-[10px] uppercase font-black"
