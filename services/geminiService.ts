@@ -2,9 +2,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIWorkoutPlan, FoodFacts } from "../types";
 
-// Always use const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+// Always use const ai = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
 // Use a placeholder if API key is not set to prevent app crashes
-const apiKey = process.env.API_KEY || "PLACEHOLDER_KEY_NOT_SET";
+const apiKey = process.env.GEMINI_API_KEY || "PLACEHOLDER_KEY_NOT_SET";
 const ai = new GoogleGenAI({ apiKey });
 
 export const generateWorkoutPlan = async (goal: string, experience: string): Promise<AIWorkoutPlan | null> => {
