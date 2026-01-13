@@ -104,6 +104,12 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, setView, curre
           {!user ? (
             <div className="flex items-center space-x-4">
               <button
+                onClick={() => onLogin(login(UserRole.TRAINER))}
+                className="border-2 border-zinc-700 text-zinc-400 px-6 py-2.5 rounded-xl uppercase font-black text-xs hover:border-[#d4ff00] hover:text-[#d4ff00] transition"
+              >
+                Coach Login
+              </button>
+              <button
                 onClick={handleJoinNow}
                 className="bg-orange-brand text-black px-6 py-2.5 rounded-xl uppercase font-black text-xs orange-glow hover:scale-105 transition active:scale-95"
               >
