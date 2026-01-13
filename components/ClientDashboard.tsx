@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { User, Workout, AIWorkoutPlan, FoodEntry, FoodFacts, StepEntry } from '../types';
 import { getWorkouts, saveWorkout, getCurrentUser, getFoodEntries, saveFoodEntry, updateUser, getSteps, saveSteps } from '../services/dataService';
 import { generateWorkoutPlan, analyzeFood } from '../services/geminiService';
-import { getNotificationStatus, requestNotificationPermission } from '../services/notificationService';
+import { getNotificationStatus, requestNotificationPermission, sendActivityNotification } from '../services/notificationService';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
 interface ClientDashboardProps {
@@ -160,6 +160,21 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
         saveFoodEntry(entry);
         setFoodEntries([entry, ...foodEntries]);
 
+        // Send notification to trainer (non-blocking)
+        sendActivityNotification({
+          userName: user.name,
+          userEmail: user.email,
+          activityType: 'food',
+          foodName: analysis.name,
+          calories: analysis.facts.calories,
+          protein: analysis.facts.protein,
+          carbs: analysis.facts.carbs,
+          fat: analysis.facts.fat
+        }).catch(error => {
+          console.error('Failed to send food log notification:', error);
+          // Don't block user flow if notification fails
+        });
+
         // Reset form and close
         form.reset();
         setShowAddFood(false);
@@ -175,6 +190,45 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
     } finally {
       setIsAnalyzingFood(false);
     }
+  };
+
+  const handleAddWorkout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as any;
+
+    const workout: Workout = {
+      id: Date.now().toString(),
+      userId: user.id,
+      exercise: form.exercise.value,
+      sets: parseInt(form.sets.value),
+      reps: parseInt(form.reps.value),
+      weight: parseInt(form.weight.value),
+      date: form.date.value
+    };
+
+    const volume = workout.sets * workout.reps * workout.weight;
+
+    // Save workout
+    saveWorkout(workout);
+    setWorkouts([workout, ...workouts]);
+
+    // Send notification to trainer (non-blocking)
+    sendActivityNotification({
+      userName: user.name,
+      userEmail: user.email,
+      activityType: 'workout',
+      exercise: workout.exercise,
+      sets: workout.sets,
+      reps: workout.reps,
+      weight: workout.weight,
+      volume: volume
+    }).catch(error => {
+      console.error('Failed to send workout log notification:', error);
+      // Don't block user flow if notification fails
+    });
+
+    // Close form
+    setShowAddWorkout(false);
   };
 
   return (
@@ -387,7 +441,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
                 </div>
               </div>
               {showAddWorkout && (
-                <form onSubmit={(e) => { e.preventDefault(); const w = { id: Date.now().toString(), userId: user.id, exercise: (e.target as any).exercise.value, sets: parseInt((e.target as any).sets.value), reps: parseInt((e.target as any).reps.value), weight: parseInt((e.target as any).weight.value), date: (e.target as any).date.value }; saveWorkout(w as any); setWorkouts([w as any, ...workouts]); setShowAddWorkout(false); }} className="bg-zinc-900 p-8 rounded-2xl border border-[#d4ff00]/30 animate-in slide-in-from-top duration-300">
+                <form onSubmit={handleAddWorkout} className="bg-zinc-900 p-8 rounded-2xl border border-[#d4ff00]/30 animate-in slide-in-from-top duration-300">
                   <h3 className="font-bold text-xl mb-6 uppercase tracking-widest text-[#d4ff00]">Log Training</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2"><label className="block text-[10px] uppercase font-bold text-zinc-500 mb-1">Exercise Name</label><input name="exercise" list="exercises" required className="w-full bg-black border border-zinc-800 rounded-xl p-4 text-white outline-none focus:border-[#d4ff00]" placeholder="E.g. Barbell Squat" /><datalist id="exercises">{uniqueExercises.map(ex => <option key={ex} value={ex} />)}</datalist></div>

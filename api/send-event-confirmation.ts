@@ -43,7 +43,7 @@ export default async function handler(req: any, res: any) {
         if (isEmail) {
             try {
                 await resend.emails.send({
-                    from: 'PettyFitness 22 <notifications@pettyfitness22.com>',
+                    from: 'PettyFitness 22 <onboarding@resend.dev>',
                     to: [contactInfo],
                     subject: `✅ Reservation Confirmed - ${eventTitle}`,
                     html: `
@@ -73,7 +73,7 @@ export default async function handler(req: any, res: any) {
         // ALWAYS send notification to trainer
         try {
             await resend.emails.send({
-                from: 'PettyFitness 22 <notifications@pettyfitness22.com>',
+                from: 'PettyFitness 22 <onboarding@resend.dev>',
                 to: [trainerEmail],
                 subject: `📅 New Event RSVP - ${eventTitle}`,
                 html: `

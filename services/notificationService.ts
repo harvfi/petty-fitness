@@ -155,3 +155,48 @@ export const sendPlanSelectionEmail = async (userName: string, userEmail: string
     action: 'plan_selection'
   });
 };
+
+// Activity Notification Functions (Food & Workout Logging)
+
+interface ActivityNotificationData {
+  userName: string;
+  userEmail?: string;
+  activityType: 'food' | 'workout';
+  // Food fields
+  foodName?: string;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+  // Workout fields
+  exercise?: string;
+  sets?: number;
+  reps?: number;
+  weight?: number;
+  volume?: number;
+}
+
+export const sendActivityNotification = async (data: ActivityNotificationData): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await fetch('/api/send-activity-notification', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Activity notification failed:', result);
+      return { success: false, error: result.error || 'Failed to send notification' };
+    }
+
+    console.log('Activity notification sent successfully:', result);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending activity notification:', error);
+    return { success: false, error: error.message || 'Network error' };
+  }
+};
