@@ -424,6 +424,46 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
               <button onClick={async () => { setIsGenerating(true); const plan = await generateWorkoutPlan(user.goal || 'General Fitness', 'Intermediate'); setAiPlan(plan); setIsGenerating(false); }} disabled={isGenerating} className="border-2 border-[#d4ff00] text-[#d4ff00] px-6 py-3 rounded-full font-bold uppercase text-sm disabled:opacity-50 hover:bg-[#d4ff00]/10 transition-all">{isGenerating ? 'Analyzing...' : 'AI Strategy'}</button>
             </div>
           </div>
+
+          {/* Current Plan Display */}
+          {user.selectedPlan && (
+            <div className="bg-gradient-to-br from-[#d4ff00]/10 to-transparent border border-[#d4ff00]/30 rounded-3xl p-8 relative overflow-hidden animate-in slide-in-from-top duration-500">
+              <div className="absolute top-0 right-0 p-6 opacity-10">
+                <svg className="w-24 h-24 text-[#d4ff00]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#d4ff00] mb-2">Active Plan</p>
+                    <h3 className="text-3xl font-bebas italic text-white">{user.selectedPlan}</h3>
+                  </div>
+                  <div className="px-4 py-2 bg-[#d4ff00]/20 border border-[#d4ff00]/40 rounded-xl">
+                    <span className="text-[#d4ff00] font-black text-xs uppercase tracking-wider">Enrolled</span>
+                  </div>
+                </div>
+                {user.planSelectedDate && (
+                  <p className="text-zinc-400 text-sm">
+                    Selected on {new Date(user.planSelectedDate).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </p>
+                )}
+                <div className="mt-6 pt-6 border-t border-zinc-800/50 flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-[#d4ff00]/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#d4ff00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Plan Active & Tracking</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -578,8 +618,8 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
               <div
                 key={goal.id}
                 className={`bg-zinc-900 border rounded-3xl p-8 transition-all ${goal.status === 'completed'
-                    ? 'border-green-500/30 bg-green-500/5'
-                    : 'border-zinc-800 hover:border-[#d4ff00]/30'
+                  ? 'border-green-500/30 bg-green-500/5'
+                  : 'border-zinc-800 hover:border-[#d4ff00]/30'
                   }`}
               >
                 <div className="flex justify-between items-start mb-4">
@@ -618,8 +658,8 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
                 <button
                   onClick={() => handleToggleGoalStatus(goal.id, goal.status)}
                   className={`w-full mt-4 py-3 rounded-xl font-bold uppercase text-xs transition-all ${goal.status === 'completed'
-                      ? 'bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30'
-                      : 'bg-[#d4ff00] text-black hover:brightness-110'
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30'
+                    : 'bg-[#d4ff00] text-black hover:brightness-110'
                     }`}
                 >
                   {goal.status === 'completed' ? '✓ Completed' : 'Mark as Complete'}
