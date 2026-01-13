@@ -241,6 +241,51 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
     setGoals(getGoalsByClient(user.id));
   };
 
+  const exportData = (data: any[], filename: string) => {
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${filename}_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportWorkouts = () => {
+    exportData(workouts, `${user.name}_workouts`);
+    alert('✅ Workouts exported successfully!');
+  };
+
+  const handleExportFood = () => {
+    exportData(foodEntries, `${user.name}_food_log`);
+    alert('✅ Food log exported successfully!');
+  };
+
+  const handleExportSteps = () => {
+    exportData(stepEntries, `${user.name}_steps`);
+    alert('✅ Steps data exported successfully!');
+  };
+
+  const handleExportAllData = () => {
+    const allData = {
+      user: {
+        name: user.name,
+        goal: user.goal,
+        selectedPlan: user.selectedPlan
+      },
+      workouts,
+      foodEntries,
+      stepEntries,
+      goals,
+      exportDate: new Date().toISOString()
+    };
+    exportData([allData], `${user.name}_complete_data`);
+    alert('✅ All data exported successfully!');
+  };
+
   return (
     <div className="space-y-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -259,7 +304,17 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
         <div className="space-y-12 animate-in fade-in duration-500">
           <div className="flex justify-between items-center">
             <h2 className="font-bebas text-4xl italic">NUTRITION FUEL</h2>
-            <button onClick={() => setShowAddFood(!showAddFood)} className="bg-[#d4ff00] text-black px-6 py-3 rounded-full font-bold uppercase text-sm shadow-lg hover:shadow-[#d4ff00]/20 transition-all">{showAddFood ? 'Close' : 'Log Food'}</button>
+            <div className="flex space-x-4">
+              <button onClick={() => setShowAddFood(!showAddFood)} className="bg-[#d4ff00] text-black px-6 py-3 rounded-full font-bold uppercase text-sm shadow-lg hover:shadow-[#d4ff00]/20 transition-all">{showAddFood ? 'Close' : 'Log Food'}</button>
+              {foodEntries.length > 0 && (
+                <button onClick={handleExportFood} className="border-2 border-zinc-700 text-zinc-400 px-6 py-3 rounded-full font-bold uppercase text-sm hover:border-[#d4ff00] hover:text-[#d4ff00] transition-all flex items-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Save Data</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -422,6 +477,14 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
             <div className="flex space-x-4">
               <button onClick={() => setShowAddWorkout(!showAddWorkout)} className="bg-[#d4ff00] text-black px-6 py-3 rounded-full font-bold uppercase text-sm shadow-lg hover:shadow-[#d4ff00]/20 transition-all">{showAddWorkout ? 'Close' : 'Log Session'}</button>
               <button onClick={async () => { setIsGenerating(true); const plan = await generateWorkoutPlan(user.goal || 'General Fitness', 'Intermediate'); setAiPlan(plan); setIsGenerating(false); }} disabled={isGenerating} className="border-2 border-[#d4ff00] text-[#d4ff00] px-6 py-3 rounded-full font-bold uppercase text-sm disabled:opacity-50 hover:bg-[#d4ff00]/10 transition-all">{isGenerating ? 'Analyzing...' : 'AI Strategy'}</button>
+              {workouts.length > 0 && (
+                <button onClick={handleExportWorkouts} className="border-2 border-zinc-700 text-zinc-400 px-6 py-3 rounded-full font-bold uppercase text-sm hover:border-[#d4ff00] hover:text-[#d4ff00] transition-all flex items-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Save Data</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -703,6 +766,14 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ user: initialUser }) 
             <div className="flex space-x-4">
               <button onClick={handleSyncHealth} disabled={isSyncing} className="flex items-center space-x-2 bg-white text-black px-6 py-3 rounded-full font-bold uppercase text-xs hover:bg-[#d4ff00] transition-all"><svg className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg><span>{isSyncing ? 'Syncing...' : 'Sync Apple Health'}</span></button>
               <button onClick={isLiveTracking ? () => setIsLiveTracking(false) : startLiveTracking} className={`px-6 py-3 rounded-full font-bold uppercase text-xs transition-all ${isLiveTracking ? 'bg-red-500 text-white animate-pulse' : 'bg-[#d4ff00] text-black'}`}>{isLiveTracking ? 'Stop Tracking' : 'Start Live Pedometer'}</button>
+              {stepEntries.length > 0 && (
+                <button onClick={handleExportSteps} className="border-2 border-zinc-700 text-zinc-400 px-6 py-3 rounded-full font-bold uppercase text-xs hover:border-[#d4ff00] hover:text-[#d4ff00] transition-all flex items-center space-x-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Save Data</span>
+                </button>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
