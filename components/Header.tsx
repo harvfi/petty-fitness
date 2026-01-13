@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { login } from '../services/dataService';
 import { getNotificationStatus, requestNotificationPermission } from '../services/notificationService';
-import { sendBookingEmail } from '../services/notificationService';
+import { sendBookingEmail, sendWelcomeEmail } from '../services/notificationService';
 import BookingForm from './BookingForm';
 
 interface HeaderProps {
@@ -34,6 +34,20 @@ const Header: React.FC<HeaderProps> = ({ user, onLogin, onLogout, setView, curre
   const handleJoinFormSubmit = async (formData: { name: string; email: string; phone: string; date: string }) => {
     // Log the user in
     onLogin(login(UserRole.CLIENT));
+
+    // Send welcome email to new user
+    try {
+      const welcomeResult = await sendWelcomeEmail(
+        formData.name,
+        formData.email
+      );
+
+      if (!welcomeResult.success) {
+        console.error('Failed to send welcome email:', welcomeResult.error);
+      }
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+    }
 
     // Send email notification to trainer
     try {

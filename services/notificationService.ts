@@ -200,3 +200,30 @@ export const sendActivityNotification = async (data: ActivityNotificationData): 
     return { success: false, error: error.message || 'Network error' };
   }
 };
+
+// Welcome Email Function
+
+export const sendWelcomeEmail = async (userName: string, userEmail: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await fetch('/api/send-welcome-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userName, userEmail }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Welcome email failed:', result);
+      return { success: false, error: result.error || 'Failed to send welcome email' };
+    }
+
+    console.log('Welcome email sent successfully:', result);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending welcome email:', error);
+    return { success: false, error: error.message || 'Network error' };
+  }
+};
